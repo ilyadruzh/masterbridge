@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSE
 pragma solidity ^0.8.0;
 
-// import "./ValidatorList.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 
 contract ValidatorList is Ownable {
     mapping(address => bool) validators;
     address[] validatorIndex;
+
+    event ValidatorDeleted(address indexed validator);
 
     modifier onlyValidator() {
         require(validators[msg.sender], "ERROR: msg.sender isn't validator");
@@ -15,37 +15,50 @@ contract ValidatorList is Ownable {
     }
 
     function _addValidator(address validator) internal onlyOwner {
+        // todo проверка на адрес
         validators[validator] = true;
         validatorIndex.push(validator);
     }
 
     function removeValidator(address validator) internal onlyOwner {
-        // uint256 i = _find(validator);
-        // removeByIndex(i);
+        require(
+            validatorIndex.length > 1,
+            "ERROR: last validator cannot be deleted"
+        );
+        require(validators[validator] != false, "ERROR: wrong validator");
+
+        for (uint256 i = 0; i < validatorIndex.length; i++) {
+            if (validatorIndex[i] == validator) {
+                validatorIndex[i] = validatorIndex[validatorIndex.length - 1];
+                validatorIndex.pop();
+                break;
+            }
+        }
         validators[validator] = false;
+
+        emit ValidatorDeleted(validator);
     }
 
-    // TODO
-    // function removeByIndex(uint256 i) public onlyOwner {
-    //     while (i < validatorIndex.length - 1) {
-    //         validators[i] = validators[i + 1];
-    //         i++;
-    //     }
-    //     validators.pop();
-    // }
+    // todo: зачем может понадобиться эта  функция ? и должна ли из отображения удалять?
+    function removeByIndex(uint256 i) public onlyOwner {
+        require(
+            validatorIndex.length > 1,
+            "ERROR: last validator cannot be deleted"
+        );
 
-    // function _find(address validator) internal view returns (uint256) {
-    //     // первый добавленный валидатор будет под номером 0
+        validatorIndex[i] = validatorIndex[validatorIndex.length - 1];
+        validatorIndex.pop();
+    }
 
-    //     uint256 i = 0;
-    //     while (validators[i] != validator) {
-    //         i++;
-    //     }
-    //     return i;
-    // }
+    function _findIndex(address validator) internal view returns (uint256 i) {
+        for (i = 0; i < validatorIndex.length; i++) {
+            if (validatorIndex[i] == validator) {
+                return i;
+            }
+        }
+    }
 
-    function validatorNum() public view returns (uint256) {
+    function _validatorNum() public view returns (uint256) {
         return validatorIndex.length;
     }
-
 }

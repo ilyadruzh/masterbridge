@@ -115,4 +115,23 @@ describe("Тестирование смарт-контракта Мастерм�
 
     });
 
+    it("Подтверждение существующей сделки НЕ валидатором", async function () {
+
+        // let _tokenNum = 1000;
+        // let _networkId = ethers.utils.formatBytes32String("masterchain")
+        // let _recipient = wallet1.address;
+
+        // const hash = soliditySha3(
+        //     _tokenNum,
+        //     _networkId,
+        //     _recipient
+        // );
+
+        const tx1 = await mastermost_inst.connect(wallet).deleteValidator(wallet.address);
+        await tx1.wait();
+
+        await expect(mastermost_inst.connect(wallet2).validatorNum(hash)).to.equal(0);
+
+    });
+
 });
