@@ -151,6 +151,12 @@ contract Mastermost is ValidatorList {
         removeValidator(validator);
     }
 
+    function isValidator(address validator) public view returns (bool) {
+        bool res = validators[validator];
+
+        return res;
+    }
+
     function validatorNum() public view returns (uint256) {
         return validatorIndex.length;
     }

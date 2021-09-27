@@ -7,6 +7,7 @@ contract ValidatorList is Ownable {
     mapping(address => bool) validators;
     address[] validatorIndex;
 
+    event ValidatorAdded(address indexed validator);
     event ValidatorDeleted(address indexed validator);
 
     modifier onlyValidator() {
@@ -18,6 +19,8 @@ contract ValidatorList is Ownable {
         // todo проверка на адрес
         validators[validator] = true;
         validatorIndex.push(validator);
+
+        emit ValidatorAdded(validator);
     }
 
     function removeValidator(address validator) internal onlyOwner {
@@ -29,8 +32,9 @@ contract ValidatorList is Ownable {
 
         for (uint256 i = 0; i < validatorIndex.length; i++) {
             if (validatorIndex[i] == validator) {
-                validatorIndex[i] = validatorIndex[validatorIndex.length - 1];
-                validatorIndex.pop();
+                // validatorIndex[i] = validatorIndex[validatorIndex.length - 1];
+                // validatorIndex.pop();
+                _removeByIndex(i);
                 break;
             }
         }
@@ -39,13 +43,7 @@ contract ValidatorList is Ownable {
         emit ValidatorDeleted(validator);
     }
 
-    // todo: зачем может понадобиться эта  функция ? и должна ли из отображения удалять?
-    function removeByIndex(uint256 i) public onlyOwner {
-        require(
-            validatorIndex.length > 1,
-            "ERROR: last validator cannot be deleted"
-        );
-
+    function _removeByIndex(uint256 i) private onlyOwner {
         validatorIndex[i] = validatorIndex[validatorIndex.length - 1];
         validatorIndex.pop();
     }
@@ -58,7 +56,7 @@ contract ValidatorList is Ownable {
         }
     }
 
-    function _validatorNum() public view returns (uint256) {
+    function _validatorNum() internal view returns (uint256) {
         return validatorIndex.length;
     }
 }
